@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>二维码生成器 · RBM 监查工作台配套工具</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:0;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;background:#f4f7f9;color:#16212e;font-size:14px;line-height:1.65}
+.wrap{max-width:960px;margin:0 auto;padding:26px 18px 60px}
+h1{font-size:19px;margin:0 0 6px}
+.sub{color:#52657a;font-size:12.6px;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid #dfe6ec;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(16,33,46,.05)}
+label{display:block;font-size:12px;color:#52657a;margin-bottom:5px;font-weight:600}
+input,select,textarea{width:100%;padding:8px 11px;border:1px solid #dfe6ec;border-radius:8px;font-size:13px;font-family:inherit}
+input:focus,textarea:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+.row2{display:flex;gap:10px}
+.row2>*{flex:1}
+button{padding:9px 16px;border-radius:8px;border:1px solid #0f766e;background:#0f766e;color:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit}
+button.ghost{background:#fff;color:#16212e;border-color:#dfe6ec}
+button:active{transform:translateY(1px)}
+.btns{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:12px}
+.qrbox canvas,.qrbox img{border:8px solid #fff;box-shadow:0 2px 10px rgba(16,33,46,.12);border-radius:8px}
+.url{font-size:11.4px;color:#8697a8;word-break:break-all;text-align:center;max-width:100%}
+.tip{background:#eaf0fe;border:1px solid #bfd4fd;border-radius:9px;padding:11px 13px;font-size:12.4px;color:#1e40af;margin-top:14px}
+.tip.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
+ol{margin:8px 0;padding-left:20px}
+ol li{margin-bottom:6px;font-size:12.6px;color:#52657a}
+b{color:#16212e}
+h3{font-size:14px;margin:0 0 12px}
+.hist{margin-top:12px;border-top:1px solid #eaeff4;padding-top:12px}
+.hist div{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed #eaeff4;font-size:11.8px}
+.hist a{color:#0f766e;text-decoration:none;word-break:break-all;flex:1}
+.hist button{padding:2px 8px;font-size:11px;border-radius:6px;background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+</style>
+<link rel="stylesheet" href="assets/css/shelf-tokens.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>二维码生成器</h1>
+  <div class="sub">RBM 监查工作台配套工具 · 完全离线可用，把工具地址变成可打印的二维码</div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>生成二维码</h3>
+      <label>二维码内容（URL 或任意文本）</label>
+      <textarea id="txt" rows="3" placeholder="https://your-domain.com/index.html"></textarea>
+
+      <div class="row2" style="margin-top:12px">
+        <div><label>尺寸（px）</label>
+          <select id="size">
+            <option value="180">180 · 名片 / 文件夹贴纸</option>
+            <option value="260" selected>260 · A4 打印海报</option>
+            <option value="360">360 · 易拉宝 / 张贴墙</option>
+            <option value="520">520 · 超大（远距离扫码）</option>
+          </select></div>
+        <div><label>纠错等级</label>
+          <select id="ecc">
+            <option value="L">L · 容错 7%</option>
+            <option value="M" selected>M · 容错 15%（推荐）</option>
+            <option value="Q">Q · 容错 25%</option>
+            <option value="H">H · 容错 30%（可加 Logo）</option>
+          </select></div>
+      </div>
+
+      <div class="row2" style="margin-top:12px">
+        <div><label>标题（打印时显示在二维码下方）</label>
+          <input id="cap" placeholder="例：RBM 监查工作台 · 扫码进入"></div>
+        <div><label>备注（仅本地保存用）</label>
+          <input id="note" placeholder="例：协和中心办公室"></div>
+      </div>
+
+      <div class="btns">
+        <button id="gen">生成二维码</button>
+        <button class="ghost" id="use-current">填入当前页面地址</button>
+        <button class="ghost" id="dl">下载 PNG</button>
+      </div>
+
+      <div class="hist" id="hist-wrap" style="display:none">
+        <label>生成历史（保存在本机）</label>
+        <div id="hist"></div>
+      </div>
+    </div>
+
+    <div class="card qrbox">
+      <div id="qr"></div>
+      <div id="cap-show" style="font-weight:700;font-size:14px"></div>
+      <div class="url" id="url-show"></div>
+    </div>
+  </div>
+
+  <div class="tip warn" style="margin-top:18px">
+    <b>关于线上链接的有效期：</b>EdgeOne Makers 的预览域名（*.edgeone.cool）链接带有访问令牌，
+    通常在部署后一段时间对新访客失效。因此：<b>①</b> 本页可随时重新生成指向最新地址的二维码；
+    <b>②</b> 若需长期稳定对外访问，请将本工具包部署到你们自己的服务器 / 内网，或为 EdgeOne 项目绑定已备案的自定义域名；
+    <b>③</b> 本工具包也可完全离线使用 —— 直接双击 index.html 即可在浏览器打开，无需任何服务器。
+  </div>
+
+  <div class="tip">
+    <b>推荐打印用法：</b>
+    <ol>
+      <li>用 260–360px 尺寸生成二维码，打印后贴在研究中心办公室 / 研究者文件夹封面；</li>
+      <li>CRA 现场扫码 → 自动打开监查工作台 → 进入「访视监查清单」开始核查；</li>
+      <li>清单数据保存在本机浏览器，回到办公室后用「离线数据同步」导出归档。</li>
+    </ol>
+  </div>
+</div>
+
+<script src="assets/vendor/qrcode.min.js"></script>
+<script>
+(function () {
+  var HK = 'rbm_qr_history_v1';
+  function $id(i) { return document.getElementById(i); }
+  function hist() { try { return JSON.parse(localStorage.getItem(HK)) || []; } catch (e) { return []; } }
+  function saveHist(a) { try { localStorage.setItem(HK, JSON.stringify(a.slice(0, 20))); } catch (e) { } }
+
+  function draw() {
+    var text = $id('txt').value.trim();
+    var box = $id('qr');
+    box.innerHTML = '';
+    if (!text) { box.innerHTML = '<div style="color:#94a3b8;font-size:12.6px;padding:40px 10px;text-align:center">请输入要生成二维码的链接</div>'; return; }
+    var size = Number($id('size').value);
+    var ecc = $id('ecc').value;
+    try {
+      new QRCode(box, { text: text, width: size, height: size, colorDark: '#0e3038', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel[ecc] });
+      $id('cap-show').textContent = $id('cap').value || '';
+      $id('url-show').textContent = text;
+      if ($id('note').value.trim() || text) {
+        var a = hist().filter(function (x) { return x.text !== text; });
+        a.unshift({ text: text, note: $id('note').value.trim(), ts: new Date().toISOString(), cap: $id('cap').value });
+        saveHist(a); renderHist();
+      }
+    } catch (e) {
+      box.innerHTML = '<div style="color:#b91c1c;font-size:12.6px">生成失败：' + e.message + '</div>';
+    }
+  }
+
+  function renderHist() {
+    var a = hist(), w = $id('hist-wrap'), el = $id('hist');
+    if (!a.length) { w.style.display = 'none'; return; }
+    w.style.display = '';
+    el.innerHTML = '';
+    a.forEach(function (x, i) {
+      var row = document.createElement('div');
+      var link = document.createElement('a');
+      link.href = '#'; link.textContent = (x.note ? '[' + x.note + '] ' : '') + x.text;
+      link.onclick = function (e) { e.preventDefault(); $id('txt').value = x.text; $id('note').value = x.note || ''; $id('cap').value = x.cap || ''; draw(); };
+      var del = document.createElement('button'); del.textContent = '删除';
+      del.onclick = function () { var b = hist(); b.splice(i, 1); saveHist(b); renderHist(); };
+      row.appendChild(link); row.appendChild(del);
+      el.appendChild(row);
+    });
+  }
+
+  $id('gen').onclick = draw;
+  $id('use-current').onclick = function () { $id('txt').value = location.href.replace(/qr-generator\.html.*$/, 'index.html'); draw(); };
+  $id('dl').onclick = function () {
+    var cv = $id('qr').querySelector('canvas');
+    if (!cv) { alert('请先生成二维码'); return; }
+    var size = Number($id('size').value), cap = $id('cap').value || '';
+    var pad = 40, capH = cap ? 58 : 0;
+    var out = document.createElement('canvas');
+    out.width = size + pad * 2; out.height = size + pad * 2 + capH;
+    var c = out.getContext('2d');
+    c.fillStyle = '#ffffff'; c.fillRect(0, 0, out.width, out.height);
+    c.drawImage(cv, pad, pad);
+    if (cap) {
+      c.fillStyle = '#0e3038'; c.font = 'bold 20px "Microsoft YaHei",sans-serif';
+      c.textAlign = 'center'; c.fillText(cap, out.width / 2, size + pad + 34);
+    }
+    var a = document.createElement('a');
+    a.href = out.toDataURL('image/png');
+    a.download = 'RBM二维码_' + (cap ? cap.replace(/[^\w\u4e00-\u9fa5]+/g, '_') : 'qrcode') + '.png';
+    a.click();
+  };
+  $id('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); draw(); } });
+
+  // 预填当前工具地址（若与 qr-generator 同目录）
+  var guess = location.href.replace(/qr-generator\.html(#.*)?(\?.*)?$/, 'index.html');
+  $id('txt').value = guess;
+  $id('cap').value = 'RBM 监查工作台 · 扫码进入';
+  draw(); renderHist();
+})();
+</script>
+</body>
+</html>

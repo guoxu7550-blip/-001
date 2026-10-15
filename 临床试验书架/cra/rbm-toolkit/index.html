@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#cdcdcd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="CRA 基于风险的监查（RBM）在线工作台：RACT 数字化评分、动态风险台账、差异化访视监查清单生成器。">
+<title>RBM 监查工作台 · CRA 风险驱动质量体系</title>
+<script>
+  /* 全局错误采集（供 ?diag=1 自检使用） */
+  window.__errs = [];
+  window.onerror = function (m, s, l, c) { window.__errs.push(m + ' @' + String(s).split('/').pop() + ':' + l); };
+  window.addEventListener('unhandledrejection', function (e) { window.__errs.push('Promise: ' + (e.reason && e.reason.message || e.reason)); });
+</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23000000'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='sans-serif' font-weight='bold' fill='white'>R</text></svg>">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/shelf-tokens.css">
+</head>
+<body>
+
+<div class="crum"><a href="../../index.html"><span class="crum-mark">书</span></a><a href="../../index.html">临床试验书架</a><span style="opacity:.45">/</span><b>CRA 小册子 · RBM 监查工作台</b><span class="crum-right"><a href="../../cra/index.html">← 返回小册子</a></span></div>
+<div class="app">
+  <!-- ==================== 侧边栏 ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">RBM</div>
+      <div>
+        <div class="sb-title">监查工作台</div>
+        <div class="sb-sub">RISK-BASED MONITORING</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav" id="nav">
+      <div class="sb-group">工作区</div>
+      <button class="nav-item active" data-view="dashboard"><span class="nav-ico">◱</span><span>监控工作台</span></button>
+      <button class="nav-item" data-view="ract"><span class="nav-ico">◈</span><span>RACT 风险评估</span><span class="nav-badge" id="nv-ract" style="display:none"></span></button>
+      <button class="nav-item" data-view="ledger"><span class="nav-ico">▤</span><span>动态风险台账</span><span class="nav-badge" id="nv-ledger" style="display:none"></span></button>
+      <button class="nav-item" data-view="checklist"><span class="nav-ico">◫</span><span>本次监察详情</span><span class="nav-badge" id="nv-checklist" style="display:none"></span></button>
+      <button class="nav-item" data-view="records"><span class="nav-ico">☷</span><span>监察记录</span></button>
+
+      <div class="sb-group">体系</div>
+      <button class="nav-item" data-view="kri"><span class="nav-ico">◐</span><span>KRI 指标监测</span></button>
+      <button class="nav-item" data-view="guide"><span class="nav-ico">?</span><span>使用指南</span></button>
+      <button class="nav-item" data-view="share"><span class="nav-ico">◎</span><span>分享 / 二维码</span></button>
+    </nav>
+
+    <div class="sb-foot">
+      <div class="sb-user" id="user-chip" title="个人信息">
+        <div class="sb-avatar" id="u-avatar">CR<img id="u-avatar-img" alt=""></div>
+        <div>
+          <div class="sb-uname" id="u-name">陈监查</div>
+          <div class="sb-urole" id="u-role">CRA 监查员</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== 主区 ==================== -->
+  <div class="main">
+    <header class="topbar">
+      <button class="btn btn-ghost mob-only" id="menu-toggle" style="font-size:18px;padding:2px 8px">☰</button>
+      <div>
+        <span class="tb-title" id="page-title">监控工作台</span>
+        <span class="tb-sub" id="page-sub"></span>
+      </div>
+      <div class="tb-right">
+        <select id="project-select" style="width:auto;min-width:180px;max-width:330px;font-size:12.4px;padding:5px 9px"></select>
+        <span class="badge badge-gray" id="role-badge">CRA</span>
+      </div>
+    </header>
+
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<script src="assets/vendor/qrcode.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/view-ract.js"></script>
+<script src="assets/js/view-ledger.js"></script>
+<script src="assets/js/view-checklist.js"></script>
+<script src="assets/js/view-misc.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
